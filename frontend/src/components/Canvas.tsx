@@ -86,8 +86,8 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(
       brushSize: number,
       eraser: boolean
     ) {
-      ctx.globalCompositeOperation = eraser ? 'destination-out' : 'source-over';
-      ctx.strokeStyle = eraser ? 'rgba(0,0,0,1)' : brushColor;
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = eraser ? '#ffffff' : brushColor;
       ctx.lineWidth = brushSize;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
@@ -95,7 +95,6 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
       ctx.stroke();
-      ctx.globalCompositeOperation = 'source-over';
     }
 
     function drawShape(
@@ -129,6 +128,11 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(
 
     // Apply an event from the remote peer
     const applyEvent = useCallback((event: DrawEvent) => {
+      // Schedule a snapshot after remote strokes land so the DO stays current
+      if (event.phase === 'end' || event.tool === 'fill' ||
+          event.tool === 'line' || event.tool === 'rect' || event.tool === 'circle') {
+        scheduleSnapshot();
+      }
       const ctx = getCtx();
       if (!ctx) return;
       const author = event.author ?? '_remote';

@@ -11,6 +11,7 @@ interface ClientMeta {
 export class DrawingRoom {
   private state: DurableObjectState;
   private canvasSnapshot: string | null = null;
+  private clearedAt: number = 0;
 
   constructor(state: DurableObjectState, _env: Env) {
     this.state = state;
@@ -89,8 +90,8 @@ export class DrawingRoom {
         break;
 
       case 'canvas_snapshot':
-        // Store snapshot for late joiners (throttled by client)
-        if (typeof data.data === 'string') {
+        // Reject stale snapshots sent within 5s of a clear
+        if (typeof data.data === 'string' && Date.now() - this.clearedAt > 5000) {
           this.canvasSnapshot = data.data;
           await this.state.storage.put('canvas', this.canvasSnapshot);
         }
@@ -111,6 +112,7 @@ export class DrawingRoom {
 
       case 'clear':
         this.canvasSnapshot = null;
+        this.clearedAt = Date.now();
         await this.state.storage.delete('canvas');
         this.broadcastExcept(ws, JSON.stringify({ type: 'clear', author: meta.name }));
         break;
