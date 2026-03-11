@@ -27,6 +27,7 @@ export interface CanvasHandle {
   getSnapshot: () => string;
   loadSnapshot: (data: string) => void;
   clear: () => void;
+  clearAndSnapshot: () => string;
 }
 
 function getPos(canvas: HTMLCanvasElement, e: MouseEvent | Touch): { x: number; y: number } {
@@ -174,6 +175,18 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(
         if (!ctx) return;
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      },
+      clearAndSnapshot: () => {
+        // Cancel any pending snapshot timer so stale data doesn't overwrite the clear
+        if (snapshotTimer.current) {
+          clearTimeout(snapshotTimer.current);
+          snapshotTimer.current = null;
+        }
+        const ctx = getCtx();
+        if (!ctx) return '';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        return mainRef.current?.toDataURL('image/png') ?? '';
       },
     }), [applyEvent]);
 

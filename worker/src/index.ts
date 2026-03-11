@@ -31,6 +31,14 @@ export default {
       return corsResponse(JSON.stringify({ roomId }));
     }
 
+    // GET /room/:id/snapshot — get current canvas state
+    if (parts[0] === 'room' && parts[1] && parts[2] === 'snapshot') {
+      const roomId = parts[1].toUpperCase();
+      const id = env.DRAWING_ROOM.idFromName(roomId);
+      const room = env.DRAWING_ROOM.get(id);
+      return room.fetch(request);
+    }
+
     // GET /room/:id/ws — WebSocket upgrade
     if (parts[0] === 'room' && parts[1] && parts[2] === 'ws') {
       const roomId = parts[1].toUpperCase();

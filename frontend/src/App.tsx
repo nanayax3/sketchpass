@@ -39,7 +39,7 @@ export default function App() {
         break;
 
       case 'clear':
-        canvasRef.current?.clear();
+        canvasRef.current?.clearAndSnapshot();
         showNotification(`${msg.author ?? 'Someone'} cleared the canvas`);
         break;
 
@@ -74,8 +74,10 @@ export default function App() {
   }, [passMode, isYourTurn, sendDraw]);
 
   function handleClear() {
-    canvasRef.current?.clear();
+    const whiteSnapshot = canvasRef.current?.clearAndSnapshot() ?? '';
     sendClear();
+    // Immediately push the white canvas snapshot so the DO stays in sync
+    if (whiteSnapshot) sendSnapshot(whiteSnapshot);
   }
 
   function handlePass() {

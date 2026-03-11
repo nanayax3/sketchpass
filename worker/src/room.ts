@@ -20,6 +20,13 @@ export class DrawingRoom {
   }
 
   async fetch(request: Request): Promise<Response> {
+    // Internal canvas fetch (from MCP handler)
+    if (request.method === 'GET' && new URL(request.url).pathname.endsWith('/snapshot')) {
+      return new Response(JSON.stringify({ snapshot: this.canvasSnapshot }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     // Internal command injection (from MCP handler)
     if (request.method === 'POST' && new URL(request.url).pathname.endsWith('/command')) {
       const cmd = await request.json() as Record<string, unknown>;

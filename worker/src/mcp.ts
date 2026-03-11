@@ -60,6 +60,17 @@ const TOOLS = [
     },
   },
   {
+    name: 'get_canvas',
+    description: 'Get the current canvas as a base64 PNG image so you can see what has been drawn.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        room_id: { type: 'string', description: 'Room code (e.g. AB3XY)' },
+      },
+      required: ['room_id'],
+    },
+  },
+  {
     name: 'erase_stroke',
     description: 'Erase part of the canvas along a path of points.',
     inputSchema: {
@@ -106,6 +117,17 @@ async function handleToolCall(env: Env, name: string, args: Record<string, unkno
   const author = String(args.author ?? 'Claude');
 
   switch (name) {
+    case 'get_canvas': {
+      const id = env.DRAWING_ROOM.idFromName(roomId);
+      const room = env.DRAWING_ROOM.get(id);
+      const res = await room.fetch(new Request(`https://internal/room/${roomId}/snapshot`));
+      const { snapshot } = await res.json() as { snapshot: string | null };
+      if (!snapshot) return 'Canvas is empty — nothing has been drawn yet.';
+      // Return as image content so Claude can actually see it
+      const base64 = snapshot.replace(/^data:image\/png;base64,/, '');
+      return { type: 'image', data: base64, mimeType: 'image/png' } as unknown as string;
+    }
+
     case 'draw_stroke': {
       const points = args.points as Array<{ x: number; y: number }>;
       if (!points?.length) return 'Error: points array is empty';
@@ -246,7 +268,11 @@ export async function handleMcp(request: Request, env: Env): Promise<Response> {
       const toolArgs = (params.arguments ?? {}) as Record<string, unknown>;
       try {
         const result = await handleToolCall(env, toolName, toolArgs);
-        return ok({ content: [{ type: 'text', text: result }] });
+        if (typeof result === 'object' && result !== null && 'type' in result && (result as {type:string}).type === 'image') {
+          const img = result as { type: string; data: string; mimeType: string };
+          return ok({ content: [{ type: 'image', data: img.data, mimeType: img.mimeType }] });
+        }
+        return ok({ content: [{ type: 'text', text: result as string }] });
       } catch (e) {
         return err(-32603, String(e));
       }
