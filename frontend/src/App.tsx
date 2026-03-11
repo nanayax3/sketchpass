@@ -43,6 +43,12 @@ export default function App() {
         showNotification(`${msg.author ?? 'Someone'} cleared the canvas`);
         break;
 
+      case 'request_snapshot': {
+        const snap = canvasRef.current?.getSnapshot();
+        if (snap) sendSnapshot(snap);
+        break;
+      }
+
       case 'user_joined':
         showNotification(`${msg.name} joined`);
         break;

@@ -21,8 +21,15 @@ export class DrawingRoom {
   }
 
   async fetch(request: Request): Promise<Response> {
-    // Internal canvas fetch (from MCP handler)
+    // Internal canvas fetch (from MCP handler) — pings clients first, then waits briefly
     if (request.method === 'GET' && new URL(request.url).pathname.endsWith('/snapshot')) {
+      const clients = this.state.getWebSockets('client');
+      if (clients.length > 0) {
+        // Ask connected clients to send a fresh snapshot now
+        this.broadcastAll(JSON.stringify({ type: 'request_snapshot' }));
+        // Wait up to 1.5s for a snapshot to arrive
+        await new Promise(r => setTimeout(r, 1500));
+      }
       return new Response(JSON.stringify({ snapshot: this.canvasSnapshot }), {
         headers: { 'Content-Type': 'application/json' },
       });

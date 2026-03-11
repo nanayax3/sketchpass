@@ -60,6 +60,10 @@ export interface CursorEvent {
   color: string;
 }
 
+export interface RequestSnapshotEvent {
+  type: 'request_snapshot';
+}
+
 export type ServerMessage =
   | DrawEvent
   | ClearEvent
@@ -68,7 +72,8 @@ export type ServerMessage =
   | UserJoinedEvent
   | UserLeftEvent
   | RoomStateEvent
-  | CursorEvent;
+  | CursorEvent
+  | RequestSnapshotEvent;
 
 export interface RoomUser {
   name: string;
