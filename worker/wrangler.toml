@@ -1,0 +1,20 @@
+name = "sketchpass-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-15"
+compatibility_flags = ["nodejs_compat"]
+# account_id = "YOUR_ACCOUNT_ID"  # optional — wrangler will detect it automatically
+
+[[durable_objects.bindings]]
+name = "DRAWING_ROOM"
+class_name = "DrawingRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["DrawingRoom"]
+
+[[kv_namespaces]]
+binding = "CANVAS_STORE"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"  # run: wrangler kv:namespace create CANVAS_STORE
+
+[vars]
+ALLOWED_ORIGIN = "*"
