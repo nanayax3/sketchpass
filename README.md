@@ -74,7 +74,7 @@ wrangler pages project create sketchpass
 wrangler pages deploy dist --project-name sketchpass
 ```
 
-That's it. Your app is live at `https://sketchpass.pages.dev` (or whatever project name you chose).
+That's it. Your app is live at `https://YOUR-PROJECT-NAME.pages.dev`.
 
 ### Local development
 
