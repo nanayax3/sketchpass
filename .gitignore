@@ -5,3 +5,4 @@ dist/
 .env.local
 .env.*.local
 package-lock.json
+wrangler.deploy.toml
