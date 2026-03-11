@@ -2,8 +2,6 @@
 
 A real-time collaborative drawing canvas. Draw together live, or pass the canvas back and forth. Runs entirely on Cloudflare — no database, no server to maintain.
 
-**[Try the demo →](https://sketchpass.pages.dev)**
-
 ---
 
 ## Features
@@ -44,7 +42,7 @@ Everything lives on Cloudflare. One account, no external services.
 ### Requirements
 
 - Node.js 18+
-- A [Cloudflare account](https://cloudflare.com) (free tier works)
+- A [Cloudflare account](https://cloudflare.com) — **free tier works**, no paid plan needed
 - Wrangler CLI: `npm install -g wrangler`
 
 ### 1. Deploy the worker
@@ -59,7 +57,8 @@ wrangler kv:namespace create CANVAS_STORE
 # → Copy the returned ID into wrangler.toml (replace REPLACE_WITH_YOUR_KV_NAMESPACE_ID)
 
 wrangler deploy
-# → Note your worker URL: https://sketchpass-worker.YOUR-SUBDOMAIN.workers.dev
+# → Your worker URL will be: https://sketchpass-worker.YOUR-SUBDOMAIN.workers.dev
+#   (YOUR-SUBDOMAIN is your Cloudflare account subdomain, shown after deploy)
 ```
 
 ### 2. Deploy the frontend
@@ -75,7 +74,7 @@ wrangler pages project create sketchpass
 wrangler pages deploy dist --project-name sketchpass
 ```
 
-That's it. Your app is live at `https://sketchpass.pages.dev`.
+That's it. Your app is live at `https://sketchpass.pages.dev` (or whatever project name you chose).
 
 ### Local development
 
