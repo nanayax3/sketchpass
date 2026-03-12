@@ -122,8 +122,8 @@ async function handleToolCall(env: Env, name: string, args: Record<string, unkno
       const room = env.DRAWING_ROOM.get(id);
       // Ping connected clients to send a fresh snapshot (non-blocking)
       await room.fetch(new Request(`https://internal/room/${roomId}/request-snapshot`, { method: 'POST' }));
-      // Wait 2s for clients to respond with their canvas
-      await new Promise(r => setTimeout(r, 2000));
+      // Wait 4s for clients to respond with their canvas
+      await new Promise(r => setTimeout(r, 4000));
       // Now fetch the (hopefully updated) snapshot
       const res = await room.fetch(new Request(`https://internal/room/${roomId}/snapshot`));
       const { snapshot } = await res.json() as { snapshot: string | null };

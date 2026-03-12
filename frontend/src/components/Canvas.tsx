@@ -48,6 +48,8 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(
     const startPos = useRef({ x: 0, y: 0 });
     const lastPos = useRef({ x: 0, y: 0 });
     const snapshotTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const onSnapshotReadyRef = useRef(onSnapshotReady);
+    onSnapshotReadyRef.current = onSnapshotReady;
 
     // Remote drawing state per author
     const remoteDrawing = useRef<Record<string, { lastX: number; lastY: number }>>({});
@@ -70,11 +72,11 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(
 
     // Schedule a snapshot upload after drawing activity
     function scheduleSnapshot() {
-      if (!onSnapshotReady) return;
+      if (!onSnapshotReadyRef.current) return;
       if (snapshotTimer.current) clearTimeout(snapshotTimer.current);
       snapshotTimer.current = setTimeout(() => {
         const data = mainRef.current?.toDataURL('image/png') ?? '';
-        if (data) onSnapshotReady(data);
+        if (data) onSnapshotReadyRef.current?.(data);
       }, 3000);
     }
 

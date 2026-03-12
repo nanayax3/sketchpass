@@ -21,6 +21,7 @@ export default function App() {
   const [notification, setNotification] = useState<string | null>(null);
 
   const canvasRef = useRef<CanvasHandle>(null);
+  const sendSnapshotRef = useRef<((data: string) => void) | null>(null);
 
   const handleMessage = useCallback((msg: ServerMessage) => {
     switch (msg.type) {
@@ -45,7 +46,7 @@ export default function App() {
 
       case 'request_snapshot': {
         const snap = canvasRef.current?.getSnapshot();
-        if (snap) sendSnapshot(snap);
+        if (snap) sendSnapshotRef.current?.(snap);
         break;
       }
 
@@ -64,6 +65,8 @@ export default function App() {
       ? { roomId: session.roomId, userName: session.name, userColor: session.color, onMessage: handleMessage }
       : { roomId: '', userName: '', userColor: '', onMessage: handleMessage }
   );
+
+  sendSnapshotRef.current = sendSnapshot;
 
   function showNotification(text: string) {
     setNotification(text);
