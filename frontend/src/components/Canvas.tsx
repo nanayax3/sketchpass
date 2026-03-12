@@ -128,7 +128,6 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(
 
     // Apply an event from the remote peer
     const applyEvent = useCallback((event: DrawEvent) => {
-      // Schedule a snapshot after remote strokes land so the DO stays current
       if (event.phase === 'end' || event.tool === 'fill' ||
           event.tool === 'line' || event.tool === 'rect' || event.tool === 'circle') {
         scheduleSnapshot();

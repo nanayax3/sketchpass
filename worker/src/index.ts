@@ -32,7 +32,8 @@ export default {
     }
 
     // GET /room/:id/snapshot — get current canvas state
-    if (parts[0] === 'room' && parts[1] && parts[2] === 'snapshot') {
+    // POST /room/:id/request-snapshot — ping clients to send a fresh snapshot
+    if (parts[0] === 'room' && parts[1] && (parts[2] === 'snapshot' || parts[2] === 'request-snapshot')) {
       const roomId = parts[1].toUpperCase();
       const id = env.DRAWING_ROOM.idFromName(roomId);
       const room = env.DRAWING_ROOM.get(id);

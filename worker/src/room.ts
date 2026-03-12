@@ -11,7 +11,6 @@ interface ClientMeta {
 export class DrawingRoom {
   private state: DurableObjectState;
   private canvasSnapshot: string | null = null;
-  private clearedAt: number = 0;
 
   constructor(state: DurableObjectState, _env: Env) {
     this.state = state;
@@ -21,16 +20,17 @@ export class DrawingRoom {
   }
 
   async fetch(request: Request): Promise<Response> {
-    // Internal canvas fetch (from MCP handler) — pings clients first, then waits briefly
+    // Internal canvas fetch (from MCP handler)
     if (request.method === 'GET' && new URL(request.url).pathname.endsWith('/snapshot')) {
-      const clients = this.state.getWebSockets('client');
-      if (clients.length > 0) {
-        // Ask connected clients to send a fresh snapshot now
-        this.broadcastAll(JSON.stringify({ type: 'request_snapshot' }));
-        // Wait up to 1.5s for a snapshot to arrive
-        await new Promise(r => setTimeout(r, 1500));
-      }
       return new Response(JSON.stringify({ snapshot: this.canvasSnapshot }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Ping connected clients to send a fresh snapshot (non-blocking)
+    if (request.method === 'POST' && new URL(request.url).pathname.endsWith('/request-snapshot')) {
+      this.broadcastAll(JSON.stringify({ type: 'request_snapshot' }));
+      return new Response(JSON.stringify({ ok: true, clients: this.state.getWebSockets('client').length }), {
         headers: { 'Content-Type': 'application/json' },
       });
     }
@@ -97,8 +97,7 @@ export class DrawingRoom {
         break;
 
       case 'canvas_snapshot':
-        // Reject stale snapshots sent within 5s of a clear
-        if (typeof data.data === 'string' && Date.now() - this.clearedAt > 5000) {
+        if (typeof data.data === 'string') {
           this.canvasSnapshot = data.data;
           await this.state.storage.put('canvas', this.canvasSnapshot);
         }
@@ -119,7 +118,6 @@ export class DrawingRoom {
 
       case 'clear':
         this.canvasSnapshot = null;
-        this.clearedAt = Date.now();
         await this.state.storage.delete('canvas');
         this.broadcastExcept(ws, JSON.stringify({ type: 'clear', author: meta.name }));
         break;

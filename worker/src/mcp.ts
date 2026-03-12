@@ -120,10 +120,14 @@ async function handleToolCall(env: Env, name: string, args: Record<string, unkno
     case 'get_canvas': {
       const id = env.DRAWING_ROOM.idFromName(roomId);
       const room = env.DRAWING_ROOM.get(id);
+      // Ping connected clients to send a fresh snapshot (non-blocking)
+      await room.fetch(new Request(`https://internal/room/${roomId}/request-snapshot`, { method: 'POST' }));
+      // Wait 2s for clients to respond with their canvas
+      await new Promise(r => setTimeout(r, 2000));
+      // Now fetch the (hopefully updated) snapshot
       const res = await room.fetch(new Request(`https://internal/room/${roomId}/snapshot`));
       const { snapshot } = await res.json() as { snapshot: string | null };
       if (!snapshot) return 'Canvas is empty — nothing has been drawn yet.';
-      // Return as image content so Claude can actually see it
       const base64 = snapshot.replace(/^data:image\/png;base64,/, '');
       return { type: 'image', data: base64, mimeType: 'image/png' } as unknown as string;
     }
