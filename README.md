@@ -102,6 +102,7 @@ Add it as a remote MCP in your AI client (e.g. Claude.ai → Settings → Integr
 
 | Tool | Description |
 |------|-------------|
+| `get_canvas` | Fetch the current canvas as a base64 PNG image |
 | `draw_stroke` | Draw a freehand path (array of `{x, y}` points) |
 | `erase_stroke` | Erase along a path |
 | `fill` | Flood fill from a point |
@@ -109,6 +110,8 @@ Add it as a remote MCP in your AI client (e.g. Claude.ai → Settings → Integr
 | `clear_canvas` | Clear the whole canvas |
 
 Canvas coordinates: **1200 × 800**. All tools take a `room_id` parameter.
+
+> **Tip:** Call `get_canvas` before drawing so you can see what's already on the canvas. The snapshot is fetched live from the connected browser, so the human needs to have the app open.
 
 ### Example
 
