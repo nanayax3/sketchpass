@@ -1,6 +1,9 @@
 export interface Env {
   DRAWING_ROOM: DurableObjectNamespace;
-  CANVAS_STORE: KVNamespace;
+  // Path-secret gate for the MCP endpoint (wrangler secret put GATE_SECRET):
+  // when set, only /<secret>/mcp answers and bare /mcp 404s. The /room/* routes
+  // stay open — the public frontend uses them, and rooms are code-gated already.
+  GATE_SECRET?: string;
 }
 
 interface ClientMeta {

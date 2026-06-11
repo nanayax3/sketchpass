@@ -48,8 +48,11 @@ export default {
       return room.fetch(request);
     }
 
-    // /mcp — MCP server endpoint
-    if (url.pathname === '/mcp' || url.pathname === '/mcp/') {
+    // /mcp — MCP server endpoint. Gated behind GATE_SECRET when set: the secret
+    // rides as the first path segment (/<secret>/mcp) and the bare /mcp falls
+    // through to 404. Secret unset (local dev) → bare /mcp answers as before.
+    const mcpPath = env.GATE_SECRET ? `/${env.GATE_SECRET}/mcp` : '/mcp';
+    if (url.pathname === mcpPath || url.pathname === `${mcpPath}/`) {
       return handleMcp(request, env);
     }
 
